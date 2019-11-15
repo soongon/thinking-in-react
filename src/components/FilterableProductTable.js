@@ -1,59 +1,61 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import SearchBar from './SearchBar';
 import ProductTable from './ProductTable';
 
-class FilterableProductTable extends React.Component {
+function FilterableProductTable(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-          filterText: '',
-          inStockOnly: false
-        };
-        
-        this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
-        this.handleInStockChange = this.handleInStockChange.bind(this);
-      }
-    
-      handleFilterTextChange(filterText) {
-        this.setState({
-          filterText: filterText
-        });
-      }
-      
-      handleInStockChange(inStockOnly) {
-        this.setState({
-          inStockOnly: inStockOnly
+  const [filterText, setFilterText] = useState('');
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [products, setProducts] = useState([
+          {category: 'Sporting Goods', price: '$59.99', stocked: true, name: 'Golf'}
+        ]);
+  
+  useEffect(() => {
+    fetch('http://localhost:3000/products')
+        .then((res) => {
+          return res.json();
         })
-      }
+        .then((json) => {
+          const newProducts = [...products, ...json]
+          setProducts(newProducts);
+        })
+        .catch((err) => {
+          console.log('에러발생', err);
+        });
+  }, ['http://localhost:3000/products']);
+
+  function handleFilterTextChange(filterText) {
+    setFilterText(filterText);
+  }
+      
+  function handleInStockChange(inStockOnly) {
+    setInStockOnly(inStockOnly);
+  }
     
-      render() {
-        return (
-          <div>
-            <SearchBar
-              filterText={this.state.filterText}
-              inStockOnly={this.state.inStockOnly}
-              onFilterTextChange={this.handleFilterTextChange}
-              onInStockChange={this.handleInStockChange}
-            />
-            <ProductTable
-              products={PRODUCTS}
-              filterText={this.state.filterText}
-              inStockOnly={this.state.inStockOnly}
-            />
-          </div>
-        );
-      }
-    
+  return (
+    <div>
+      <SearchBar
+        filterText={filterText}
+        inStockOnly={inStockOnly}
+        onFilterTextChange={handleFilterTextChange}
+        onInStockChange={handleInStockChange}
+      />
+      <ProductTable
+        products={products}
+        filterText={filterText}
+        inStockOnly={inStockOnly}
+      />
+    </div>
+  );
 }
 
-const PRODUCTS = [
-    {category: 'Sporting Goods', price: '$49.99', stocked: true, name: 'Football'},
-    {category: 'Sporting Goods', price: '$9.99', stocked: true, name: 'Baseball'},
-    {category: 'Sporting Goods', price: '$29.99', stocked: false, name: 'Basketball'},
-    {category: 'Electronics', price: '$99.99', stocked: true, name: 'iPod Touch'},
-    {category: 'Electronics', price: '$399.99', stocked: false, name: 'iPhone 5'},
-    {category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7'}
-  ];
+// const PRODUCTS = [
+//     {category: 'Sporting Goods', price: '$49.99', stocked: true, name: 'Football'},
+//     {category: 'Sporting Goods', price: '$9.99', stocked: true, name: 'Baseball'},
+//     {category: 'Sporting Goods', price: '$29.99', stocked: false, name: 'Basketball'},
+//     {category: 'Electronics', price: '$99.99', stocked: true, name: 'iPod Touch'},
+//     {category: 'Electronics', price: '$399.99', stocked: false, name: 'iPhone 5'},
+//     {category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7'}
+//   ];
 
 export default FilterableProductTable;
